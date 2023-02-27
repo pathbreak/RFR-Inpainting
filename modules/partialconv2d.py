@@ -52,7 +52,13 @@ class PartialConv2d(nn.Conv2d):
                     else:
                         mask = torch.ones(1, 1, input.data.shape[2], input.data.shape[3]).to(input)
                         
-                self.update_mask = F.conv2d(mask, self.weight_maskUpdater, bias=None, stride=self.stride, padding=self.padding, dilation=self.dilation, groups=1)
+                self.update_mask = F.conv2d(mask, 
+                                            self.weight_maskUpdater, 
+                                            bias=None, 
+                                            stride=self.stride, 
+                                            padding=self.padding, 
+                                            dilation=self.dilation, 
+                                            groups=1)
 
                 self.mask_ratio = self.slide_winsize/(self.update_mask + 1e-8)
                 # self.mask_ratio = torch.max(self.update_mask)/(self.update_mask + 1e-8)

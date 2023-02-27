@@ -38,7 +38,9 @@ class KnowledgeConsistentAttention(nn.Module):
                 conv_result = F.avg_pool2d(conv_result, 3, 1, padding = 1)*9
             attention_scores = F.softmax(conv_result, dim = 1)
             if self.att_scores_prev is not None:
-                attention_scores = (self.att_scores_prev[i:i+1]*self.masks_prev[i:i+1] + attention_scores * (torch.abs(self.ratio)+1e-7))/(self.masks_prev[i:i+1]+(torch.abs(self.ratio)+1e-7))
+                attention_scores = ((self.att_scores_prev[i:i+1]*self.masks_prev[i:i+1] + 
+                                    attention_scores * (torch.abs(self.ratio)+1e-7)) / 
+                                    (self.masks_prev[i:i+1]+(torch.abs(self.ratio)+1e-7)))
             att_score.append(attention_scores)
             feature_map = F.conv_transpose2d(attention_scores, conv_kernels, stride = 1, padding = self.patch_size//2)
             final_output = feature_map
@@ -50,8 +52,12 @@ class KnowledgeConsistentAttention(nn.Module):
 class AttentionModule(nn.Module):
     
     def __init__(self, inchannel, patch_size_list = [1], propagate_size_list = [3], stride_list = [1]):
-        assert isinstance(patch_size_list, list), "patch_size should be a list containing scales, or you should use Contextual Attention to initialize your module"
-        assert len(patch_size_list) == len(propagate_size_list) and len(propagate_size_list) == len(stride_list), "the input_lists should have same lengths"
+        assert isinstance(patch_size_list, list), \
+            "patch_size should be a list containing scales, or you should use Contextual Attention to initialize your module"
+            
+        assert len(patch_size_list) == len(propagate_size_list) and len(propagate_size_list) == len(stride_list), \
+            "the input_lists should have same lengths"
+
         super(AttentionModule, self).__init__()
 
         self.att = KnowledgeConsistentAttention(patch_size_list[0], propagate_size_list[0], stride_list[0])
