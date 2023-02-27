@@ -126,7 +126,7 @@ class RFRModule(nn.Module):
         return h
 
 class RFRNet(nn.Module):
-    def __init__(self):
+    def __init__(self, num_recurrences=6):
         super(RFRNet, self).__init__()
         self.Pconv1 = PartialConv2d(3, 64, 7, 2, 3, multi_channel = True, bias = False)
         self.bn1 = nn.BatchNorm2d(64)
@@ -141,6 +141,8 @@ class RFRNet(nn.Module):
         self.tail1 = PartialConv2d(67, 32, 3, 1, 1, multi_channel = True, bias = False)
         self.tail2 = Bottleneck(32,8)
         self.out = nn.Conv2d(64,3,3,1,1, bias = False)
+        
+        self.num_recurrences = num_recurrences
 
     def forward(self, in_image, mask):
         x1, m1 = self.Pconv1(in_image, mask)
@@ -155,7 +157,9 @@ class RFRNet(nn.Module):
         self.RFRModule.att.att.att_scores_prev = None
         self.RFRModule.att.att.masks_prev = None
 
-        for i in range(8):
+        print(f'num_recurrences={self.num_recurrences}')
+        
+        for i in range(self.num_recurrences):
             x2, m2 = self.Pconv21(x2, m2)
             x2, m2 = self.Pconv22(x2, m2)
             x2 = F.leaky_relu(self.bn2(x2), inplace = True)

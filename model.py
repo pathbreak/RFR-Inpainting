@@ -22,8 +22,8 @@ class RFRNetModel():
         self.comp_B = None
         self.l1_loss_val = 0.0
     
-    def initialize_model(self, path=None, train=True):
-        self.G = RFRNet()
+    def initialize_model(self, path=None, train=True, num_recurrences=6):
+        self.G = RFRNet(num_recurrences)
         self.optm_G = optim.Adam(self.G.parameters(), lr = 2e-4)
         if train:
             self.lossNet = VGG16FeatureExtractor()
